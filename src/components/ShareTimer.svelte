@@ -132,7 +132,7 @@
       showToast = false;
     }, 4000);
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('NA Share Timer', { body: msg });
+      new Notification('Share Timer', { body: msg });
     }
   }
 
@@ -309,7 +309,7 @@
   <!-- Header (hidden in fullscreen) -->
   {#if !fullscreen}
     <div class="mb-8 text-center">
-      <h1 class="text-3xl font-bold tracking-tight text-white">NA Share Timer</h1>
+      <h1 class="text-3xl font-bold tracking-tight text-white">Share Timer</h1>
       <p class="mt-1 text-sm text-gray-500">12-Step Share Timer</p>
     </div>
   {/if}
