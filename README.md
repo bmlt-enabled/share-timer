@@ -15,6 +15,12 @@ Alerts are generated entirely in the browser using the **[Web Audio API](https:/
 
 On **iOS**, the Web Audio API is blocked until a user gesture occurs. The timer handles this by calling `audioContext.resume()` the moment the user taps Start. On **iOS 17+**, the app also sets `navigator.audioSession.type = "playback"` so that alert sounds fire even when the device is on silent.
 
+## Screen Wake Lock
+
+The app uses the **[Screen Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API)** to prevent the device screen from dimming or locking while the timer is running. Without this, a phone left on a table would lock mid-session and miss the audio alerts.
+
+The wake lock is acquired when the timer starts and released when it is paused, reset, or expires. Because the browser automatically drops the wake lock whenever the page is hidden (e.g. the user switches apps), the app re-requests it as soon as the page becomes visible again while the timer is still running. On browsers that do not support the API the feature is silently skipped.
+
 ## Stack
 
 - [Svelte 5](https://svelte.dev) + TypeScript

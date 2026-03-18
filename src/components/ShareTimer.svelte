@@ -216,6 +216,23 @@
     warnChime(tone);
   }
 
+  // ── Screen Wake Lock ──────────────────────────────────────────────────────
+  let wakeLock: WakeLockSentinel | null = null;
+
+  async function acquireWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch {
+      /* permission denied or unavailable */
+    }
+  }
+
+  function releaseWakeLock() {
+    wakeLock?.release();
+    wakeLock = null;
+  }
+
   // ── Notifications ─────────────────────────────────────────────────────────
   function notify(msg: string, color: typeof toastColor = 'green') {
     toastMsg = msg;
@@ -256,6 +273,7 @@
   function start() {
     if (remaining === 0 || expired) return;
     unlockAudio();
+    acquireWakeLock();
     expired = false;
     running = true;
     alarmTarget = Date.now() + remaining * 1000;
@@ -265,6 +283,7 @@
   }
 
   function pause() {
+    releaseWakeLock();
     running = false;
     if (ivId) {
       clearInterval(ivId);
@@ -273,6 +292,7 @@
   }
 
   function stop() {
+    releaseWakeLock();
     running = false;
     if (ivId) {
       clearInterval(ivId);
@@ -290,7 +310,10 @@
 
   // Re-check when tab becomes visible or window regains focus
   function onVis() {
-    if (!document.hidden && running) tick();
+    if (!document.hidden && running) {
+      tick();
+      acquireWakeLock(); // browser drops wake lock on hide — re-acquire on return
+    }
   }
   function onFoc() {
     if (running) tick();
