@@ -71,10 +71,28 @@
   let dashOffset = $derived(C * (1 - pct / 100));
 
   // ── Audio (Web Audio API) ─────────────────────────────────────────────────
-  function beep(freq: number, dur: number, vol = 0.5) {
+  let audioCtx: AudioContext | null = null;
+
+  function getAudioCtx(): AudioContext | null {
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioCtx();
+      if (!audioCtx) audioCtx = new AudioCtx();
+      return audioCtx;
+    } catch {
+      return null;
+    }
+  }
+
+  // Must be called from a user gesture to unlock audio on iOS
+  function unlockAudio() {
+    const ctx = getAudioCtx();
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+  }
+
+  function beep(freq: number, dur: number, vol = 0.5) {
+    try {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
@@ -140,6 +158,7 @@
 
   function start() {
     if (remaining === 0 || expired) return;
+    unlockAudio();
     expired = false;
     running = true;
     alarmTarget = Date.now() + remaining * 1000;
