@@ -85,6 +85,10 @@
 
   // Must be called from a user gesture to unlock audio on iOS
   function unlockAudio() {
+    // iOS 17+: set session to "playback" so audio fires even when muted
+    if ('audioSession' in navigator) {
+      (navigator as any).audioSession.type = 'playback';
+    }
     const ctx = getAudioCtx();
     if (ctx && ctx.state === 'suspended') ctx.resume();
   }
