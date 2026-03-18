@@ -11,7 +11,8 @@
     UserOutline,
     TrashBinOutline,
     ForwardOutline,
-    BellActiveAltOutline
+    BellActiveAltOutline,
+    GithubSolid
   } from 'flowbite-svelte-icons';
 
   // ── Persisted settings ────────────────────────────────────────────────────
@@ -632,6 +633,17 @@
 
     <!-- Keyboard hints -->
     <p class="mt-4 hidden text-center text-xs text-gray-700 sm:block">Space · Start/Pause &nbsp;|&nbsp; R · Reset &nbsp;|&nbsp; F · Fullscreen &nbsp;|&nbsp; N · Next speaker</p>
+
+    <!-- GitHub link -->
+    <a
+      href="https://github.com/bmlt-enabled/share-timer/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="mt-4 flex items-center justify-center gap-1.5 text-xs text-gray-700 transition-colors hover:text-gray-400"
+    >
+      <GithubSolid class="h-4 w-4" />
+      bmlt-enabled/share-timer
+    </a>
   {/if}
 </div>
 

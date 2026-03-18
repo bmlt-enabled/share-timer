@@ -57,4 +57,9 @@ npm run build   # production build
 npm run lint    # prettier + eslint + svelte-check
 ```
 
-[Bootstrapped with svelte5-vite-ts-tailwind-eslint](https://github.com/pjaudiomv/svelte5-vite-ts-tailwind-eslint/)
+## Attribution
+
+This project is developed and maintained by [BMLT Enabled](https://bmlt.app), a volunteer group building open-source tools for the recovery community.
+
+- GitHub: [bmlt-enabled/share-timer](https://github.com/bmlt-enabled/share-timer/)
+- Bootstrapped with [svelte5-vite-ts-tailwind-eslint](https://github.com/pjaudiomv/svelte5-vite-ts-tailwind-eslint/)
