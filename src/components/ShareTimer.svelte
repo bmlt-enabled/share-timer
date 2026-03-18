@@ -260,7 +260,11 @@
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (e.code === 'Space') {
         e.preventDefault();
-        running ? pause() : start();
+        if (running) {
+          pause();
+        } else {
+          start();
+        }
       }
       if (e.code === 'KeyR') reset();
       if (e.code === 'KeyF') toggleFullscreen();
@@ -352,7 +356,7 @@
       <RefreshOutline class="me-2 h-5 w-5" />
       Reset
     </Button>
-    <Button color="dark" onclick={toggleFullscreen}>
+    <Button color="dark" onclick={toggleFullscreen} class="hidden sm:flex">
       {#if fullscreen}
         <CompressOutline class="me-2 h-5 w-5" />
         Exit Full
@@ -393,7 +397,7 @@
       <!-- Queue list -->
       {#if queue.length > 0}
         <div class="mb-3 max-h-44 space-y-2 overflow-y-auto pr-1">
-          {#each queue as name, i}
+          {#each queue as name, i (name + i)}
             <div class="flex items-center justify-between rounded-lg bg-gray-800 px-3 py-2">
               <span class="text-sm text-gray-200">
                 <Badge color="gray" class="me-2">{i + 1}</Badge>{name}
@@ -422,9 +426,11 @@
 
       <div class="mb-3 grid grid-cols-2 gap-3">
         <div>
-          <label class="mb-1 block text-xs text-gray-400">Meeting minutes</label>
+          <label for="calc-mins" class="mb-1 block text-xs text-gray-400">Meeting minutes</label>
           <input
+            id="calc-mins"
             type="number"
+            inputmode="numeric"
             min={1}
             max={300}
             bind:value={calcMins}
@@ -432,9 +438,11 @@
           />
         </div>
         <div>
-          <label class="mb-1 block text-xs text-gray-400">People in room</label>
+          <label for="calc-people" class="mb-1 block text-xs text-gray-400">People in room</label>
           <input
+            id="calc-people"
             type="number"
+            inputmode="numeric"
             min={1}
             max={200}
             bind:value={calcPeople}
@@ -449,18 +457,22 @@
         <p class="mt-0.5 text-xs text-gray-500">({calcPerPersonSecs}s · nearest 15s)</p>
       </div>
 
-      <Button color="blue" class="w-full" onclick={applyCalcTime} disabled={calcPerPersonSecs === 0}>
-        Apply to Timer
-      </Button>
+      <Button color="blue" class="w-full" onclick={applyCalcTime} disabled={calcPerPersonSecs === 0}>Apply to Timer</Button>
     </Card>
 
     <!-- Keyboard hints -->
-    <p class="mt-4 text-center text-xs text-gray-700">Space · Start/Pause &nbsp;|&nbsp; R · Reset &nbsp;|&nbsp; F · Fullscreen &nbsp;|&nbsp; N · Next speaker</p>
+    <p class="mt-4 hidden text-center text-xs text-gray-700 sm:block">Space · Start/Pause &nbsp;|&nbsp; R · Reset &nbsp;|&nbsp; F · Fullscreen &nbsp;|&nbsp; N · Next speaker</p>
   {/if}
 </div>
 
 <!-- Settings modal -->
-<Modal title="Timer Settings" bind:open={showSettings} size="sm">
+<Modal
+  title="Timer Settings"
+  bind:open={showSettings}
+  size="sm"
+  class="!bg-gray-900"
+  classes={{ header: '!bg-gray-900 !border-gray-700 !text-white', body: '!bg-gray-900', footer: '!bg-gray-900 !border-gray-700' }}
+>
   <div class="space-y-6">
     <div>
       <Label class="mb-2 block font-medium text-white">Share duration: <span class="text-blue-400">{sMins} min</span></Label>
@@ -501,7 +513,7 @@
 
   {#snippet footer()}
     <Button onclick={saveSettings}>Save &amp; Reset Timer</Button>
-    <Button color="alternative" onclick={() => (showSettings = false)}>Cancel</Button>
+    <Button color="dark" onclick={() => (showSettings = false)}>Cancel</Button>
   {/snippet}
 </Modal>
 
