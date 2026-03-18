@@ -15,9 +15,6 @@
   } from 'flowbite-svelte-icons';
 
   // ── Persisted settings ────────────────────────────────────────────────────
-  const initMins = Number(localStorage.getItem('na-total-min') ?? 3);
-  const initWarn = Number(localStorage.getItem('na-warning-sec') ?? 60);
-  const initDanger = Number(localStorage.getItem('na-danger-sec') ?? 10);
   type Tone = 'soft' | 'bell' | 'buzz' | 'wacky' | 'arcade' | 'scifi' | 'alarm' | 'laser';
   const toneOptions: { value: Tone; label: string }[] = [
     { value: 'soft', label: 'Soft' },
@@ -29,11 +26,34 @@
     { value: 'alarm', label: 'Alarm' },
     { value: 'laser', label: 'Laser' }
   ];
-  const initTone = (localStorage.getItem('na-tone') ?? 'soft') as Tone;
+  const validTones = toneOptions.map((t) => t.value);
+
+  // URL params override localStorage (allows bookmarkable presets)
+  function getParam(key: string): string | null {
+    const match = location.search
+      .slice(1)
+      .split('&')
+      .find((p) => p.startsWith(`${key}=`));
+    return match ? decodeURIComponent(match.slice(key.length + 1)) : null;
+  }
+  const initMins = Number(getParam('mins') ?? localStorage.getItem('na-total-min') ?? 3);
+  const initWarn = Number(getParam('warn') ?? localStorage.getItem('na-warning-sec') ?? 60);
+  const initDanger = Number(getParam('danger') ?? localStorage.getItem('na-danger-sec') ?? 10);
+  const _paramTone = getParam('tone') as Tone | null;
+  const initTone: Tone = _paramTone && validTones.includes(_paramTone) ? _paramTone : ((localStorage.getItem('na-tone') ?? 'soft') as Tone);
+
   let totalMinutes = $state(initMins);
   let warningAt = $state(initWarn);
   let dangerAt = $state(initDanger);
   let toneType = $state<Tone>(initTone);
+
+  function buildQs(mins: number, warn: number, danger: number, tone: Tone): string {
+    return `?mins=${mins}&warn=${warn}&danger=${danger}&tone=${tone}`;
+  }
+
+  function syncUrl() {
+    history.replaceState(null, '', buildQs(totalMinutes, warningAt, dangerAt, toneType));
+  }
 
   // ── Timer core ────────────────────────────────────────────────────────────
   let totalSecs = $derived(totalMinutes * 60);
@@ -359,8 +379,15 @@
     localStorage.setItem('na-warning-sec', String(warningAt));
     localStorage.setItem('na-danger-sec', String(dangerAt));
     localStorage.setItem('na-tone', sTone);
+    syncUrl();
     reset();
     showSettings = false;
+  }
+
+  async function copySettingsLink() {
+    const url = `${location.origin}${location.pathname}${buildQs(sMins, sWarn, sDanger, sTone)}`;
+    await navigator.clipboard.writeText(url);
+    notify('Link copied!', 'green');
   }
 
   // ── Share time calculator ─────────────────────────────────────────────────
@@ -681,6 +708,7 @@
 
   {#snippet footer()}
     <Button onclick={saveSettings}>Save &amp; Reset Timer</Button>
+    <Button color="dark" onclick={copySettingsLink}>Copy Link</Button>
     <Button color="dark" onclick={() => (showSettings = false)}>Cancel</Button>
   {/snippet}
 </Modal>
