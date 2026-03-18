@@ -18,9 +18,22 @@
   const initMins = Number(localStorage.getItem('na-total-min') ?? 3);
   const initWarn = Number(localStorage.getItem('na-warning-sec') ?? 60);
   const initDanger = Number(localStorage.getItem('na-danger-sec') ?? 10);
+  type Tone = 'soft' | 'bell' | 'buzz' | 'wacky' | 'arcade' | 'scifi' | 'alarm' | 'laser';
+  const toneOptions: { value: Tone; label: string }[] = [
+    { value: 'soft', label: 'Soft' },
+    { value: 'bell', label: 'Bell' },
+    { value: 'buzz', label: 'Buzz' },
+    { value: 'wacky', label: 'Wacky' },
+    { value: 'arcade', label: 'Arcade' },
+    { value: 'scifi', label: 'Sci-Fi' },
+    { value: 'alarm', label: 'Alarm' },
+    { value: 'laser', label: 'Laser' }
+  ];
+  const initTone = (localStorage.getItem('na-tone') ?? 'soft') as Tone;
   let totalMinutes = $state(initMins);
   let warningAt = $state(initWarn);
   let dangerAt = $state(initDanger);
+  let toneType = $state<Tone>(initTone);
 
   // ── Timer core ────────────────────────────────────────────────────────────
   let totalSecs = $derived(totalMinutes * 60);
@@ -93,7 +106,7 @@
     if (ctx && ctx.state === 'suspended') ctx.resume();
   }
 
-  function beep(freq: number, dur: number, vol = 0.5) {
+  function beep(freq: number, dur: number, vol = 0.5, oscType: OscillatorType = 'sine') {
     try {
       const ctx = getAudioCtx();
       if (!ctx) return;
@@ -102,7 +115,7 @@
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.frequency.value = freq;
-      osc.type = 'sine';
+      osc.type = oscType;
       gain.gain.setValueAtTime(vol, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
       osc.start();
@@ -112,15 +125,95 @@
     }
   }
 
-  function warnChime() {
-    beep(880, 0.2);
-    setTimeout(() => beep(880, 0.2), 300);
+  function warnChime(tone = toneType) {
+    if (tone === 'bell') {
+      beep(1318, 0.25);
+      setTimeout(() => beep(1318, 0.25), 350);
+    } else if (tone === 'buzz') {
+      beep(440, 0.15, 0.4, 'square');
+      setTimeout(() => beep(440, 0.15, 0.4, 'square'), 250);
+    } else if (tone === 'wacky') {
+      beep(1200, 0.12, 0.22, 'triangle');
+      setTimeout(() => beep(500, 0.12, 0.22, 'triangle'), 140);
+      setTimeout(() => beep(1450, 0.12, 0.22, 'triangle'), 280);
+      setTimeout(() => beep(420, 0.16, 0.22, 'triangle'), 420);
+    } else if (tone === 'arcade') {
+      beep(660, 0.08, 0.18, 'square');
+      setTimeout(() => beep(880, 0.08, 0.18, 'square'), 90);
+      setTimeout(() => beep(1100, 0.1, 0.18, 'square'), 180);
+      setTimeout(() => beep(1320, 0.12, 0.18, 'square'), 290);
+    } else if (tone === 'scifi') {
+      beep(980, 0.12, 0.16, 'sawtooth');
+      setTimeout(() => beep(780, 0.12, 0.14, 'sawtooth'), 110);
+      setTimeout(() => beep(620, 0.16, 0.14, 'sawtooth'), 230);
+      setTimeout(() => beep(860, 0.08, 0.12, 'triangle'), 380);
+    } else if (tone === 'alarm') {
+      beep(950, 0.14, 0.22, 'square');
+      setTimeout(() => beep(700, 0.14, 0.22, 'square'), 170);
+      setTimeout(() => beep(950, 0.14, 0.22, 'square'), 340);
+      setTimeout(() => beep(700, 0.14, 0.22, 'square'), 510);
+    } else if (tone === 'laser') {
+      beep(1800, 0.06, 0.2, 'sawtooth');
+      setTimeout(() => beep(1200, 0.06, 0.18, 'sawtooth'), 70);
+      setTimeout(() => beep(700, 0.08, 0.16, 'sawtooth'), 140);
+      setTimeout(() => beep(300, 0.1, 0.14, 'sawtooth'), 210);
+    } else {
+      beep(880, 0.2);
+      setTimeout(() => beep(880, 0.2), 300);
+    }
   }
 
-  function expireChime() {
-    beep(440, 0.35);
-    setTimeout(() => beep(554, 0.35), 450);
-    setTimeout(() => beep(659, 0.55), 900);
+  function expireChime(tone = toneType) {
+    if (tone === 'bell') {
+      beep(659, 0.4);
+      setTimeout(() => beep(880, 0.4), 500);
+      setTimeout(() => beep(1318, 0.6), 1000);
+    } else if (tone === 'buzz') {
+      beep(220, 0.3, 0.4, 'square');
+      setTimeout(() => beep(330, 0.3, 0.4, 'square'), 400);
+      setTimeout(() => beep(440, 0.5, 0.4, 'square'), 800);
+    } else if (tone === 'wacky') {
+      beep(1450, 0.12, 0.22, 'triangle');
+      setTimeout(() => beep(420, 0.12, 0.22, 'triangle'), 130);
+      setTimeout(() => beep(1200, 0.12, 0.22, 'triangle'), 260);
+      setTimeout(() => beep(500, 0.12, 0.22, 'triangle'), 390);
+      setTimeout(() => beep(900, 0.2, 0.22, 'triangle'), 550);
+    } else if (tone === 'arcade') {
+      beep(440, 0.08, 0.18, 'square');
+      setTimeout(() => beep(660, 0.08, 0.18, 'square'), 90);
+      setTimeout(() => beep(880, 0.08, 0.18, 'square'), 180);
+      setTimeout(() => beep(1100, 0.08, 0.18, 'square'), 270);
+      setTimeout(() => beep(1320, 0.18, 0.18, 'square'), 360);
+    } else if (tone === 'scifi') {
+      beep(1200, 0.14, 0.16, 'sawtooth');
+      setTimeout(() => beep(900, 0.14, 0.14, 'sawtooth'), 130);
+      setTimeout(() => beep(600, 0.18, 0.14, 'sawtooth'), 280);
+      setTimeout(() => beep(400, 0.22, 0.12, 'sawtooth'), 450);
+    } else if (tone === 'alarm') {
+      beep(950, 0.14, 0.28, 'square');
+      setTimeout(() => beep(700, 0.14, 0.28, 'square'), 170);
+      setTimeout(() => beep(950, 0.14, 0.28, 'square'), 340);
+      setTimeout(() => beep(700, 0.14, 0.28, 'square'), 510);
+      setTimeout(() => beep(950, 0.2, 0.28, 'square'), 700);
+    } else if (tone === 'laser') {
+      beep(1800, 0.06, 0.22, 'sawtooth');
+      setTimeout(() => beep(1200, 0.06, 0.2, 'sawtooth'), 70);
+      setTimeout(() => beep(700, 0.08, 0.18, 'sawtooth'), 140);
+      setTimeout(() => beep(300, 0.1, 0.16, 'sawtooth'), 210);
+      setTimeout(() => beep(1800, 0.06, 0.22, 'sawtooth'), 420);
+      setTimeout(() => beep(1200, 0.06, 0.2, 'sawtooth'), 490);
+      setTimeout(() => beep(700, 0.08, 0.18, 'sawtooth'), 560);
+      setTimeout(() => beep(200, 0.18, 0.2, 'sawtooth'), 650);
+    } else {
+      beep(440, 0.35);
+      setTimeout(() => beep(554, 0.35), 450);
+      setTimeout(() => beep(659, 0.55), 900);
+    }
+  }
+
+  function previewTone(tone: Tone) {
+    unlockAudio();
+    warnChime(tone);
   }
 
   // ── Notifications ─────────────────────────────────────────────────────────
@@ -146,7 +239,7 @@
     } else if (left === warningAt) {
       warnChime();
       notify(`${Math.round(warningAt / 60)} minute${warningAt >= 120 ? 's' : ''} remaining`, 'yellow');
-    } else if (left === dangerAt) {
+    } else if (dangerAt > 0 && left === dangerAt) {
       warnChime();
       notify(`${dangerAt} seconds left!`, 'red');
     }
@@ -224,11 +317,13 @@
   let sMins = $state(0);
   let sWarn = $state(0);
   let sDanger = $state(0);
+  let sTone = $state<Tone>('soft');
 
   function openSettings() {
     sMins = totalMinutes;
     sWarn = warningAt;
     sDanger = dangerAt;
+    sTone = toneType;
     showSettings = true;
   }
 
@@ -236,9 +331,11 @@
     totalMinutes = sMins;
     warningAt = sWarn;
     dangerAt = sDanger;
+    toneType = sTone;
     localStorage.setItem('na-total-min', String(totalMinutes));
     localStorage.setItem('na-warning-sec', String(warningAt));
     localStorage.setItem('na-danger-sec', String(dangerAt));
+    localStorage.setItem('na-tone', sTone);
     reset();
     showSettings = false;
   }
@@ -520,12 +617,37 @@
 
     <div>
       <Label class="mb-2 block font-medium text-white">
-        Alarm at: <span class="text-red-400">{sDanger}s remaining</span>
+        Alarm at:
+        {#if sDanger === 0}
+          <span class="text-gray-500">Off</span>
+        {:else}
+          <span class="text-red-400">{sDanger}s remaining</span>
+        {/if}
       </Label>
-      <Range min={5} max={30} step={5} bind:value={sDanger} />
+      <Range min={0} max={30} step={5} bind:value={sDanger} />
       <div class="mt-1 flex justify-between text-xs text-gray-500">
-        <span>5s</span><span>30s</span>
+        <span>Off</span><span>30s</span>
       </div>
+    </div>
+
+    <div>
+      <Label class="mb-3 block font-medium text-white">Alert tone</Label>
+      <div class="grid grid-cols-2 gap-2">
+        {#each toneOptions as { value, label } (value)}
+          <button
+            onclick={() => {
+              sTone = value;
+              previewTone(value);
+            }}
+            class="rounded-lg border px-3 py-2 text-sm font-medium transition-colors {sTone === value
+              ? 'border-blue-500 bg-blue-600 text-white'
+              : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'}"
+          >
+            {label}
+          </button>
+        {/each}
+      </div>
+      <p class="mt-1.5 text-xs text-gray-500">Tap to preview</p>
     </div>
 
     <div class="rounded-lg bg-gray-800 p-3 text-xs text-gray-400">
@@ -542,7 +664,7 @@
 
 <!-- Toast notifications -->
 {#if showToast}
-  <Toast color={toastColor} position="bottom-right" dismissable={false} class="!bg-gray-900 !text-white !border-gray-700">
+  <Toast color={toastColor} position="bottom-right" dismissable={false} class="!border-gray-700 !bg-gray-900 !text-white">
     {toastMsg}
   </Toast>
 {/if}
