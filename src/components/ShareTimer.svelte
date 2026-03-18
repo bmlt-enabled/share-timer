@@ -538,7 +538,7 @@
 
 <!-- Toast notifications -->
 {#if showToast}
-  <Toast color={toastColor} position="bottom-right" dismissable={false}>
+  <Toast color={toastColor} position="bottom-right" dismissable={false} class="!bg-gray-900 !text-white !border-gray-700">
     {toastMsg}
   </Toast>
 {/if}
