@@ -12,7 +12,8 @@
     TrashBinOutline,
     ForwardOutline,
     BellActiveAltOutline,
-    GithubSolid
+    GithubSolid,
+    LinkOutline
   } from 'flowbite-svelte-icons';
 
   // ── Persisted settings ────────────────────────────────────────────────────
@@ -719,9 +720,16 @@
   </div>
 
   {#snippet footer()}
-    <Button onclick={saveSettings}>Save &amp; Reset Timer</Button>
-    <Button color="dark" onclick={copySettingsLink}>Copy Link</Button>
-    <Button color="dark" onclick={() => (showSettings = false)}>Cancel</Button>
+    <div class="flex w-full items-center justify-between">
+      <Button size="sm" color="dark" onclick={copySettingsLink} title="Copy shareable link to these settings">
+        <LinkOutline class="me-1.5 h-4 w-4" />
+        Copy Link
+      </Button>
+      <div class="flex gap-2">
+        <Button onclick={saveSettings}>Save &amp; Reset Timer</Button>
+        <Button color="dark" onclick={() => (showSettings = false)}>Cancel</Button>
+      </div>
+    </div>
   {/snippet}
 </Modal>
 
